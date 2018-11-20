@@ -1,0 +1,5 @@
+/target
+**/*.rs.bk
+Cargo.lock
+*.spc
+src/main.rs
