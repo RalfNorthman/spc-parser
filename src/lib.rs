@@ -22,23 +22,22 @@ pub enum FileVersion {
 named!(
     bit_to_bool<bool>, 
     bits!( alt!(
-            tag_bits!(u8, 1, 0) => { |_| false } | 
-            tag_bits!(u8, 1, 1) => { |_| true }
-            )
+        tag_bits!(u8, 1, 0) => { |_| false } | 
+        tag_bits!(u8, 1, 1) => { |_| true }
         )
-    );
+    ));
 
 named!(
     file_type_flags<&[u8], FileTypeFlags>,
     do_parse!(
-        y16bit_precision: bit_to_bool >>
-        experiment_extension: bit_to_bool >>
-        multifile: bit_to_bool >>
-        z_randomly_ordered: bit_to_bool >>
-        z_not_even: bit_to_bool >>
-        custom_axis_labels: bit_to_bool >>
+        y16bit_precision:         bit_to_bool >>
+        experiment_extension:     bit_to_bool >>
+        multifile:                bit_to_bool >>
+        z_randomly_ordered:       bit_to_bool >>
+        z_not_even:               bit_to_bool >>
+        custom_axis_labels:       bit_to_bool >>
         each_subfile_own_x_array: bit_to_bool >>
-        xy_file: bit_to_bool >>
+        xy_file:                  bit_to_bool >>
         (FileTypeFlags {
             y16bit_precision,
             experiment_extension,
@@ -88,6 +87,26 @@ mod tests {
         assert_eq!(
             bit_to_bool(slice_b),
             Ok((&slice_b[1..], true))
+            );
+    }
+
+    #[test]
+    fn file_type_flags_test() {
+        let byte = vec![0b01_10_11_00];
+        let slice = &byte[..];
+        assert_eq!(
+            file_type_flags(slice),
+            Ok((&[][..], 
+                FileTypeFlags {
+                    y16bit_precision: false,
+                    experiment_extension: true,
+                    multifile: true,
+                    z_randomly_ordered: false,
+                    z_not_even: true,
+                    custom_axis_labels: true,
+                    each_subfile_own_x_array: false,
+                    xy_file: false,
+                }))
             );
     }
 }
