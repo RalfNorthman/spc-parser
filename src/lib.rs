@@ -3,6 +3,14 @@ extern crate nom;
 
 use std::fs::File;
 use std::io::Read;
+use nom::le_u32;
+
+#[derive(Debug, PartialEq)]
+pub struct Spc {
+    file_version: FileVersion,
+    regular_floats: bool,
+    number_of_points: u32,
+}
 
 #[derive(Debug, PartialEq)]
 pub struct FileTypeFlags {
@@ -49,11 +57,17 @@ named!(
 );
 
 named!(
-    pub just_4_first_bytes<(FileVersion, bool)>,
+    pub main_tryout<Spc>,
     do_parse!(
         take!(1) >> file_version: file_version >> 
         take!(1) >> regular_floats: regular_floats >>
-        (file_version, regular_floats)
+        number_of_points: le_u32 >> (
+        Spc{
+            file_version,
+            regular_floats,
+            number_of_points
+        }
+        )
     )
 );
 
