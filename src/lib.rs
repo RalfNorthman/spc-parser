@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate nom;
 
+use std::fs::File;
+use std::io::Read;
+
 #[derive(Debug, PartialEq)]
 pub struct FileTypeFlags {
     y16bit_precision: bool,
@@ -19,49 +22,15 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-named!(
-    bit_to_bool<(&[u8], usize), bool>, 
-    alt!(
-        tag_bits!(u8, 1, 0) => { |_| false } | 
-        tag_bits!(u8, 1, 1) => { |_| true }
-        )
-    );
+pub fn read_header(name: &str) -> [u8; 512] {
+    let filename = String::from(name);
+    let mut file_handle =
+        File::open(filename).expect("Error opening file");
 
-named!(
-    file_type_flags<&[u8], FileTypeFlags>,
-    do_parse!( 
-        bits: bits!(
-            tuple!(
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1),
-                take_bits!(u8, 1)
-                )
-            ) >>
-        y16bit_precision:         bit_to_bool(bits.0, 1) >>
-        experiment_extension:     bit_to_bool(bits.1, 1) >>
-        multifile:                bit_to_bool(bits.2, 1) >>
-        z_randomly_ordered:       bit_to_bool(bits.3, 1) >>
-        z_not_even:               bit_to_bool(bits.4, 1) >>
-        custom_axis_labels:       bit_to_bool(bits.5, 1) >>
-        each_subfile_own_x_array: bit_to_bool(bits.6, 1) >>
-        xy_file:                  bit_to_bool(bits.7, 1) >>
-        (FileTypeFlags {
-            y16bit_precision,
-            experiment_extension,
-            multifile,
-            z_randomly_ordered,
-            z_not_even,
-            custom_axis_labels,
-            each_subfile_own_x_array,
-            xy_file,
-        })
-        )
-    );
+    let mut buf = [0u8; 512];
+    file_handle.read(&mut buf).expect("Error reading file");
+    buf
+}
 
 named!(
     file_version<&[u8], FileVersion>,
@@ -70,6 +39,13 @@ named!(
         tag!(&[0x4d]) => { |_| FileVersion::OldLabCalcFormat }
         )
     );
+
+named!(
+    pub just_file_version<FileVersion>,
+    do_parse!(
+        take!(1) >> file_version: file_version >> (file_version)
+    )
+);
 
 #[cfg(test)]
 mod tests {
@@ -85,40 +61,5 @@ mod tests {
             file_version(&[0x4d]),
             Ok((&[][..], FileVersion::OldLabCalcFormat))
         );
-    }
-
-    #[test]
-    fn bit_to_bool_test() {
-        let bytes = vec![0b01_11_11_11, 0b10_00_00_00];
-        let slice_a = &bytes[..];
-        let slice_b = &bytes[1..];
-        assert_eq!(
-            bit_to_bool(slice_a),
-            Ok((&slice_a[1..], false))
-            );
-        assert_eq!(
-            bit_to_bool(slice_b),
-            Ok((&slice_b[1..], true))
-            );
-    }
-
-    #[test]
-    fn file_type_flags_test() {
-        let byte = vec![0b01_10_11_00];
-        let slice = &byte[..];
-        assert_eq!(
-            file_type_flags(slice),
-            Ok((&[][..], 
-                FileTypeFlags {
-                    y16bit_precision: false,
-                    experiment_extension: true,
-                    multifile: true,
-                    z_randomly_ordered: false,
-                    z_not_even: true,
-                    custom_axis_labels: true,
-                    each_subfile_own_x_array: false,
-                    xy_file: false,
-                }))
-            );
     }
 }
