@@ -20,24 +20,36 @@ pub enum FileVersion {
 }
 
 named!(
-    bit_to_bool<bool>, 
-    bits!( alt!(
+    bit_to_bool<(&[u8], usize), bool>, 
+    alt!(
         tag_bits!(u8, 1, 0) => { |_| false } | 
         tag_bits!(u8, 1, 1) => { |_| true }
         )
-    ));
+    );
 
 named!(
     file_type_flags<&[u8], FileTypeFlags>,
-    do_parse!(
-        y16bit_precision:         bit_to_bool >>
-        experiment_extension:     bit_to_bool >>
-        multifile:                bit_to_bool >>
-        z_randomly_ordered:       bit_to_bool >>
-        z_not_even:               bit_to_bool >>
-        custom_axis_labels:       bit_to_bool >>
-        each_subfile_own_x_array: bit_to_bool >>
-        xy_file:                  bit_to_bool >>
+    do_parse!( 
+        bits: bits!(
+            tuple!(
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1),
+                take_bits!(u8, 1)
+                )
+            ) >>
+        y16bit_precision:         bit_to_bool(bits.0, 1) >>
+        experiment_extension:     bit_to_bool(bits.1, 1) >>
+        multifile:                bit_to_bool(bits.2, 1) >>
+        z_randomly_ordered:       bit_to_bool(bits.3, 1) >>
+        z_not_even:               bit_to_bool(bits.4, 1) >>
+        custom_axis_labels:       bit_to_bool(bits.5, 1) >>
+        each_subfile_own_x_array: bit_to_bool(bits.6, 1) >>
+        xy_file:                  bit_to_bool(bits.7, 1) >>
         (FileTypeFlags {
             y16bit_precision,
             experiment_extension,
