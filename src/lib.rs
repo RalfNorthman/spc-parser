@@ -33,17 +33,27 @@ pub fn read_header(name: &str) -> [u8; 512] {
 }
 
 named!(
-    file_version<&[u8], FileVersion>,
+    file_version<FileVersion>,
     alt!(
         tag!(&[0x4b]) => { |_| FileVersion::NewFormat } |
         tag!(&[0x4d]) => { |_| FileVersion::OldLabCalcFormat }
         )
-    );
+);
 
 named!(
-    pub just_file_version<FileVersion>,
+    regular_floats<bool>,
+    alt!(
+        tag!(&[0x80]) => { |_| true } |
+        take!(1) => { |_| false }
+        )
+);
+
+named!(
+    pub just_4_first_bytes<(FileVersion, bool)>,
     do_parse!(
-        take!(1) >> file_version: file_version >> (file_version)
+        take!(1) >> file_version: file_version >> 
+        take!(1) >> regular_floats: regular_floats >>
+        (file_version, regular_floats)
     )
 );
 
@@ -60,6 +70,18 @@ mod tests {
         assert_eq!(
             file_version(&[0x4d]),
             Ok((&[][..], FileVersion::OldLabCalcFormat))
+        );
+    }
+
+    #[test]
+    fn regular_floats_test() {
+        assert_eq!(
+            regular_floats(&[0x80]),
+            Ok((&[][..], true))
+        );
+        assert_eq!(
+            regular_floats(&[0x3b]),
+            Ok((&[][..], false))
         );
     }
 }
