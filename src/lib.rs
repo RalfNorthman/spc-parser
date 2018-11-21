@@ -4,15 +4,15 @@ extern crate nom;
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
-use nom::{le_u32, double};
+use nom::{le_u32, le_f64};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
     file_version: FileVersion,
     regular_floats: bool,
     number_of_points: u32,
-    first_x: Option<f64>,
-    last_x: Option<f64>,
+    first_x: f64,
+    last_x: f64,
     number_of_subfiles: u32,
 }
 
@@ -60,14 +60,6 @@ named!(
 );
 
 named!(
-    double_or_none<Option<f64> >,
-    alt!(
-        double => {|f| Some(f) } |
-        take!(8) => {|_| None }
-        )
-    );
-
-named!(
     pub main_tryout<Spc>,
     do_parse!(
         take!(1) >>
@@ -75,8 +67,8 @@ named!(
         take!(1) >>
         regular_floats: regular_floats >>
         number_of_points: le_u32 >> 
-        first_x: double_or_none >>
-        last_x: double_or_none >>
+        first_x: le_f64 >>
+        last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
         ( Spc{
             file_version,
