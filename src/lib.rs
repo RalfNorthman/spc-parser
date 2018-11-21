@@ -3,7 +3,8 @@ extern crate nom;
 
 use std::fs::File;
 use std::io::Read;
-use nom::le_u32;
+use std::ffi::OsString;
+use nom::{le_u32, double};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -30,12 +31,11 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_header(name: &str) -> [u8; 512] {
-    let filename = String::from(name);
+pub fn read_header(filename: OsString) -> [u8; 8] {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buf = [0u8; 512];
+    let mut buf = [0u8; 8];
     file_handle.read(&mut buf).expect("Error reading file");
     buf
 }
@@ -61,13 +61,12 @@ named!(
     do_parse!(
         take!(1) >> file_version: file_version >> 
         take!(1) >> regular_floats: regular_floats >>
-        number_of_points: le_u32 >> (
-        Spc{
+        number_of_points: le_u32 >> 
+        ( Spc{
             file_version,
             regular_floats,
-            number_of_points
-        }
-        )
+            number_of_points,
+        })
     )
 );
 
