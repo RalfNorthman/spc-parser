@@ -11,6 +11,9 @@ pub struct Spc {
     file_version: FileVersion,
     regular_floats: bool,
     number_of_points: u32,
+    first_x: Option<f64>,
+    last_x: Option<f64>,
+    number_of_subfiles: u32,
 }
 
 #[derive(Debug, PartialEq)]
@@ -31,11 +34,11 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_header(filename: OsString) -> [u8; 8] {
+pub fn read_header(filename: OsString) -> [u8; 30] {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buf = [0u8; 8];
+    let mut buf = [0u8; 30];
     file_handle.read(&mut buf).expect("Error reading file");
     buf
 }
@@ -57,15 +60,31 @@ named!(
 );
 
 named!(
+    double_or_none<Option<f64> >,
+    alt!(
+        double => {|f| Some(f) } |
+        take!(8) => {|_| None }
+        )
+    );
+
+named!(
     pub main_tryout<Spc>,
     do_parse!(
-        take!(1) >> file_version: file_version >> 
-        take!(1) >> regular_floats: regular_floats >>
+        take!(1) >>
+        file_version: file_version >>
+        take!(1) >>
+        regular_floats: regular_floats >>
         number_of_points: le_u32 >> 
+        first_x: double_or_none >>
+        last_x: double_or_none >>
+        number_of_subfiles: le_u32 >>
         ( Spc{
             file_version,
             regular_floats,
             number_of_points,
+            first_x,
+            last_x,
+            number_of_subfiles,
         })
     )
 );
