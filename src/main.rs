@@ -16,9 +16,9 @@ fn print_header(filename: OsString) {
         Spc {
             file_type_flags:
                 FileTypeFlags {
+                    multifile,
                     z_randomly_ordered,
                     z_not_even,
-                    custom_axis_labels,
                     ..
                 },
             number_of_subfiles,
@@ -28,10 +28,10 @@ fn print_header(filename: OsString) {
     {
         println!(
             "multi: {:?}, z_rand: {:?}, not_even: {:?}, \
-             # of subfiles: {:?}",
-            custom_axis_labels,
-            z_not_even,
+             subfiles: {}",
+            multifile,
             z_randomly_ordered,
+            z_not_even,
             number_of_subfiles
         );
     }
@@ -55,6 +55,3 @@ fn print_all() {
         }
     }
 }
-// z_randomly_ordered: bool,
-// z_not_even: bool,
-// custom_axis_labels: bool,

@@ -71,27 +71,28 @@ named!(
 named!(
     file_type_flags<FileTypeFlags>,
     bits!(
-    do_parse!(
-        y16bit_precision: bit_to_bool >>
-        experiment_extension: bit_to_bool >>
-        multifile: bit_to_bool >>
-        z_randomly_ordered: bit_to_bool >>
-        z_not_even: bit_to_bool >>
-        custom_axis_labels: bit_to_bool >>
-        each_subfile_own_x_array: bit_to_bool >>
-        xy_file: bit_to_bool >>
-        (    FileTypeFlags {
-                 y16bit_precision,
-                 experiment_extension,
-                 multifile,
-                 z_randomly_ordered,
-                 z_not_even,
-                 custom_axis_labels,
-                 each_subfile_own_x_array,
-                 xy_file 
+        do_parse!(
+            xy_file: bit_to_bool >>
+            each_subfile_own_x_array: bit_to_bool >>
+            custom_axis_labels: bit_to_bool >>
+            z_not_even: bit_to_bool >>
+            z_randomly_ordered: bit_to_bool >>
+            multifile: bit_to_bool >>
+            experiment_extension: bit_to_bool >>
+            y16bit_precision: bit_to_bool >>
+            ( FileTypeFlags {
+                y16bit_precision,
+                experiment_extension,
+                multifile,
+                z_randomly_ordered,
+                z_not_even,
+                custom_axis_labels,
+                each_subfile_own_x_array,
+                xy_file,
             })
-        ))
-    );
+        )
+    )
+);
 
 
 named!(
@@ -105,7 +106,7 @@ named!(
         first_x: le_f64 >>
         last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
-        ( Spc{
+        ( Spc {
             file_type_flags,
             file_version,
             regular_floats,
