@@ -8,25 +8,25 @@ use nom::{le_u32, le_f64};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
-    file_type_flags: FileTypeFlags,
-    file_version: FileVersion,
-    regular_floats: bool,
-    number_of_points: u32,
-    first_x: f64,
-    last_x: f64,
-    number_of_subfiles: u32,
+    pub file_type_flags: FileTypeFlags,
+    pub file_version: FileVersion,
+    pub regular_floats: bool,
+    pub number_of_points: u32,
+    pub first_x: f64,
+    pub last_x: f64,
+    pub number_of_subfiles: u32,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct FileTypeFlags {
-    y16bit_precision: bool,
-    experiment_extension: bool,
-    multifile: bool,
-    z_randomly_ordered: bool,
-    z_not_even: bool,
-    custom_axis_labels: bool,
-    each_subfile_own_x_array: bool,
-    xy_file: bool,
+    pub y16bit_precision: bool,
+    pub experiment_extension: bool,
+    pub multifile: bool,
+    pub z_randomly_ordered: bool,
+    pub z_not_even: bool,
+    pub custom_axis_labels: bool,
+    pub each_subfile_own_x_array: bool,
+    pub xy_file: bool,
 }
 
 #[derive(Debug, PartialEq)]
