@@ -24,6 +24,7 @@ fn print_all() {
                 if entry
                     .file_name()
                     .to_string_lossy()
+                    .to_lowercase()
                     .ends_with(".spc")
                 {
                     println!("{:?}", entry.file_name());
