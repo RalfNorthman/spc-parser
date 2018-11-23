@@ -4,36 +4,15 @@ fn main() {
     print_all();
 }
 
-use spc_parser::{FileTypeFlags, Spc};
 use std::ffi::OsString;
 use std::fs;
 
 fn print_header(filename: OsString) {
-    let mut header = spc_parser::read_header(filename);
+    let mut raw_header = spc_parser::read_header(filename);
 
-    if let Ok((
-        _,
-        Spc {
-            file_type_flags:
-                FileTypeFlags {
-                    multifile,
-                    z_randomly_ordered,
-                    z_not_even,
-                    ..
-                },
-            number_of_subfiles,
-            ..
-        },
-    )) = spc_parser::main_tryout(&mut header)
+    let result = spc_parser::main_header(&mut raw_header);
     {
-        println!(
-            "multi: {:?}, z_rand: {:?}, not_even: {:?}, \
-             subfiles: {}",
-            multifile,
-            z_randomly_ordered,
-            z_not_even,
-            number_of_subfiles
-        );
+        println!("{:#?}", result);
     }
 }
 

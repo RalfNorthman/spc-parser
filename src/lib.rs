@@ -35,13 +35,13 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_header(filename: OsString) -> [u8; 30] {
+pub fn read_header(filename: OsString) -> [u8; 512] {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buf = [0u8; 30];
-    file_handle.read(&mut buf).expect("Error reading file");
-    buf
+    let mut buffer = [0u8; 512];
+    file_handle.read(&mut buffer).expect("Error reading file");
+    buffer
 }
 
 named!(
@@ -96,7 +96,7 @@ named!(
 
 
 named!(
-    pub main_tryout<Spc>,
+    pub main_header<Spc>,
     do_parse!(
         file_type_flags: file_type_flags >>
         file_version: file_version >>
@@ -106,6 +106,7 @@ named!(
         first_x: le_f64 >>
         last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
+        take!(512 - 28) >>
         ( Spc {
             file_type_flags,
             file_version,
