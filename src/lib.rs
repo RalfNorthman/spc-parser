@@ -37,12 +37,12 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_file(filename: &OsString) -> [u8; 20_000] {
+pub fn read_file(filename: &OsString) -> Vec<u8> {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buffer = [0u8; 20_000];
-    file_handle.read(&mut buffer).expect("Error reading file");
+    let mut buffer: Vec<u8> = vec![];
+    file_handle.read_to_end(&mut buffer).expect("Error reading file");
     buffer
 }
 

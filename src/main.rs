@@ -10,10 +10,8 @@ use std::fs;
 fn print_file(filename: &OsString) {
     let mut raw_file = spc_parser::read_file(filename);
 
-    let result = spc_parser::parse_file(&mut raw_file);
-    {
-        println!("{:#?}", result);
-    }
+    let result = spc_parser::parse_file(&mut raw_file[..]);
+    println!("{:#?}", result);
 }
 
 fn print_all() {
