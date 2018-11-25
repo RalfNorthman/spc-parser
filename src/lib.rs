@@ -41,8 +41,18 @@ pub fn read_file(filename: &OsString) -> Vec<u8> {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buffer: Vec<u8> = vec![];
-    file_handle.read_to_end(&mut buffer).expect("Error reading file");
+    let file_size = file_handle
+        .metadata()
+        .expect("Error getting metadata")
+        .len();
+
+    let mut buffer: Vec<u8> =
+        Vec::with_capacity(file_size as usize);
+
+    file_handle
+        .read_to_end(&mut buffer)
+        .expect("Error reading file");
+
     buffer
 }
 
