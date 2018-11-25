@@ -4,7 +4,7 @@ extern crate nom;
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
-use nom::{le_u32, le_f64};
+use nom::{le_u32, le_f64, le_f32};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -15,6 +15,8 @@ pub struct Spc {
     pub first_x: f64,
     pub last_x: f64,
     pub number_of_subfiles: u32,
+    pub custom_axis_strings: String,
+    pub xy_file_x_data: Option<Vec<f32> >,
 }
 
 #[derive(Debug, PartialEq)]
@@ -35,11 +37,11 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_header(filename: OsString) -> [u8; 512] {
+pub fn read_header(filename: OsString) -> [u8; 20_000] {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
-    let mut buffer = [0u8; 512];
+    let mut buffer = [0u8; 20_000];
     file_handle.read(&mut buffer).expect("Error reading file");
     buffer
 }
@@ -106,7 +108,12 @@ named!(
         first_x: le_f64 >>
         last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
-        take!(512 - 28) >>
+        take!(217 - 28) >>
+        custom_axis_strings: take_str!(30) >>
+        take!(265) >>
+        xy_file_x_data: cond!(
+            file_type_flags.xy_file,
+            count!(le_f32, number_of_points as usize)) >>
         ( Spc {
             file_type_flags,
             file_version,
@@ -115,6 +122,8 @@ named!(
             first_x,
             last_x,
             number_of_subfiles,
+            custom_axis_strings: String::from(custom_axis_strings),
+            xy_file_x_data,
         })
     )
 );
