@@ -7,10 +7,10 @@ fn main() {
 use std::ffi::OsString;
 use std::fs;
 
-fn print_header(filename: &OsString) {
-    let mut raw_header = spc_parser::read_header(filename);
+fn print_file(filename: &OsString) {
+    let mut raw_file = spc_parser::read_file(filename);
 
-    let result = spc_parser::main_header(&mut raw_header);
+    let result = spc_parser::parse_file(&mut raw_file);
     {
         println!("{:#?}", result);
     }
@@ -28,7 +28,7 @@ fn print_all() {
                     .ends_with(".spc")
                 {
                     println!("{:?}", entry.file_name());
-                    print_header(&entry.file_name());
+                    print_file(&entry.file_name());
                     println!("");
                 }
             }

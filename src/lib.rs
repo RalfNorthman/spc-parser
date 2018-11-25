@@ -37,7 +37,7 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
-pub fn read_header(filename: &OsString) -> [u8; 20_000] {
+pub fn read_file(filename: &OsString) -> [u8; 20_000] {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
 
@@ -98,7 +98,7 @@ named!(
 
 
 named!(
-    pub main_header<Spc>,
+    pub parse_file<Spc>,
     do_parse!(
         file_type_flags: file_type_flags >>
         file_version: file_version >>
