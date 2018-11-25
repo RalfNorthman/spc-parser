@@ -4,3 +4,4 @@ Cargo.lock
 *.spc
 *.SPC
 /spc_files
+result.txt
