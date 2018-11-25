@@ -16,7 +16,8 @@ pub struct Spc {
     pub last_x: f64,
     pub number_of_subfiles: u32,
     pub custom_axis_strings: String,
-    pub xy_file_x_data: Option<Vec<f32> >,
+    pub xy_single_file_x_data: Option<Vec<f32> >,
+    pub single_and_xyy_multi_y_data: Option<Vec<f32> >,
 }
 
 #[derive(Debug, PartialEq)]
@@ -121,8 +122,15 @@ named!(
         take!(217 - 28) >>
         custom_axis_strings: take_str!(30) >>
         take!(265) >>
-        xy_file_x_data: cond!(
-            file_type_flags.xy_file,
+        xy_single_file_x_data: cond!(
+            file_type_flags.xy_file &&
+            !file_type_flags.multifile &&
+            regular_floats,
+            count!(le_f32, number_of_points as usize)) >>
+        take!(32) >>
+        single_and_xyy_multi_y_data: cond!(
+            !file_type_flags.each_subfile_own_x_array &&
+              regular_floats,
             count!(le_f32, number_of_points as usize)) >>
         ( Spc {
             file_type_flags,
@@ -133,7 +141,8 @@ named!(
             last_x,
             number_of_subfiles,
             custom_axis_strings: String::from(custom_axis_strings),
-            xy_file_x_data,
+            xy_single_file_x_data,
+            single_and_xyy_multi_y_data,
         })
     )
 );
