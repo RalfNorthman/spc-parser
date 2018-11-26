@@ -4,7 +4,7 @@ extern crate nom;
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
-use nom::{le_u32, le_f64, le_f32};
+use nom::{le_u32, le_f64, le_f32, le_u8};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -15,7 +15,9 @@ pub struct Spc {
     pub first_x: f64,
     pub last_x: f64,
     pub number_of_subfiles: u32,
-    pub custom_axis_strings: String,
+    pub x_unit: u8,
+    pub y_unit: u8,
+    pub z_unit: u8,
     pub xy_single_file_x_data: Option<Vec<f32> >,
     pub single_and_xyy_multi_y_data: Option<Vec<f32> >,
 }
@@ -119,9 +121,10 @@ named!(
         first_x: le_f64 >>
         last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
-        take!(217 - 28) >>
-        custom_axis_strings: take_str!(30) >>
-        take!(265) >>
+        x_unit: le_u8 >>
+        y_unit: le_u8 >>
+        z_unit: le_u8 >>
+        take!(217 - 28 - 3 + 30 + 265) >>
         xy_single_file_x_data: cond!(
             file_type_flags.xy_file &&
             !file_type_flags.multifile &&
@@ -140,7 +143,9 @@ named!(
             first_x,
             last_x,
             number_of_subfiles,
-            custom_axis_strings: String::from(custom_axis_strings),
+            x_unit,
+            y_unit,
+            z_unit,
             xy_single_file_x_data,
             single_and_xyy_multi_y_data,
         })
