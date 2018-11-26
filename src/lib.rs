@@ -4,7 +4,7 @@ extern crate nom;
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
-use nom::{le_u32, le_f64, le_f32, le_u8};
+use nom::{le_u32, le_f64, le_f32};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -15,9 +15,9 @@ pub struct Spc {
     pub first_x: f64,
     pub last_x: f64,
     pub number_of_subfiles: u32,
-    pub x_unit: u8,
-    pub y_unit: u8,
-    pub z_unit: u8,
+    pub x_unit: XUnit,
+    pub y_unit: YUnit,
+    pub z_unit: YUnit,
     pub xy_single_file_x_data: Option<Vec<f32> >,
     pub single_and_xyy_multi_y_data: Option<Vec<f32> >,
 }
@@ -178,7 +178,7 @@ named!(
 );
 
 named!(
-    x_unit<XUnit>,
+    x_unit_p<XUnit>,
     alt!(
         tag!(&[0]) => { |_| XUnit::Arbitrary } |
         tag!(&[1]) => { |_| XUnit::WaveNumber } |
@@ -216,7 +216,7 @@ named!(
 );
 
 named!(
-    y_unit<YUnit>,
+    y_unit_p<YUnit>,
     alt!(
         tag!(&[0]) => { |_| YUnit::Arbitrary } |
         tag!(&[1]) => { |_| YUnit::Interferogram } |
@@ -260,9 +260,9 @@ named!(
         first_x: le_f64 >>
         last_x: le_f64 >>
         number_of_subfiles: le_u32 >>
-        x_unit: le_u8 >>
-        y_unit: le_u8 >>
-        z_unit: le_u8 >>
+        x_unit: x_unit_p >>
+        y_unit: y_unit_p >>
+        z_unit: y_unit_p >>
         take!(217 - 28 - 3 + 30 + 265) >>
         xy_single_file_x_data: cond!(
             file_type_flags.xy_file &&
@@ -316,6 +316,42 @@ mod tests {
         assert_eq!(
             regular_floats(&[0x3b]),
             Ok((&[][..], false))
+        );
+    }
+
+    #[test]
+    fn x_unit_test() {
+        assert_eq!(
+            x_unit_p(&[13]),
+            Ok((&[][..], XUnit::RamanShift))
+        );
+        assert_eq!(
+            x_unit_p(&[255]),
+            Ok((&[][..], XUnit::NoLabels))
+        );
+        assert_eq!(
+            x_unit_p(&[1]),
+            Ok((&[][..], XUnit::WaveNumber))
+        );
+        assert_eq!(
+            x_unit_p(&[3]),
+            Ok((&[][..], XUnit::NanoMeters))
+        );
+    }
+
+    #[test]
+    fn y_unit_test() {
+        assert_eq!(
+            y_unit_p(&[19]),
+            Ok((&[][..], YUnit::TemperatureF))
+        );
+        assert_eq!(
+            y_unit_p(&[0]),
+            Ok((&[][..], YUnit::Arbitrary))
+        );
+        assert_eq!(
+            y_unit_p(&[128]),
+            Ok((&[][..], YUnit::Transmission))
         );
     }
 }
