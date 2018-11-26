@@ -40,6 +40,74 @@ pub enum FileVersion {
     OldLabCalcFormat,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum XUnit {
+    Arbitrary,
+    WaveNumber,
+    MicroMeters,
+    NanoMeters,
+    Seconds,
+    Minutes,
+    Hertz,
+    KHertz,
+    MHertz,
+    Mass,
+    PartsPerMillion,
+    Days,
+    Years,
+    RamanShift,
+    ElectronVolt,
+    Custom,
+    DiodeNumber,
+    Channel,
+    Degrees,
+    TemperatureF,
+    TemperatureC,
+    TemperatureK,
+    DataPoints,
+    MilliSeconds,
+    MicroSeconds,
+    NanoSeconds,
+    GigaHertz,
+    Centimeters,
+    Meters,
+    MilliMeters,
+    Hours,
+    NoLabels,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum YUnit {
+    Arbitrary,
+    Interferogram,
+    Absorbance,
+    KubelkaMonk,
+    Counts,
+    Volts,
+    Degrees,
+    MilliAmpere,
+    MilliMeters,
+    MilliVolts,
+    LogOneOverR,
+    Percent,
+    Intensity,
+    RelativeIntensity,
+    Energy,
+    Decibel,
+    TemperatureF,
+    TemperatureC,
+    TemperatureK,
+    IndexOfRefraction,
+    ExtinctionCoefficient,
+    Real,
+    Imaginary,
+    Complex,
+    Transmission,
+    Reflectance,
+    Valley,
+    Emission,
+}
+
 pub fn read_file(filename: &OsString) -> Vec<u8> {
     let mut file_handle =
         File::open(filename).expect("Error opening file");
@@ -109,6 +177,77 @@ named!(
     )
 );
 
+named!(
+    x_unit<XUnit>,
+    alt!(
+        tag!(&[0]) => { |_| XUnit::Arbitrary } |
+        tag!(&[1]) => { |_| XUnit::WaveNumber } |
+        tag!(&[2]) => { |_| XUnit::MicroMeters } |
+        tag!(&[3]) => { |_| XUnit::NanoMeters } |
+        tag!(&[4]) => { |_| XUnit::Seconds } |
+        tag!(&[5]) => { |_| XUnit::Minutes } |
+        tag!(&[6]) => { |_| XUnit::Hertz } |
+        tag!(&[7]) => { |_| XUnit::KHertz } |
+        tag!(&[8]) => { |_| XUnit::MHertz } |
+        tag!(&[9]) => { |_| XUnit::Mass } |
+        tag!(&[10]) => { |_| XUnit::PartsPerMillion } |
+        tag!(&[11]) => { |_| XUnit::Days } |
+        tag!(&[12]) => { |_| XUnit::Years } |
+        tag!(&[13]) => { |_| XUnit::RamanShift } |
+        tag!(&[14]) => { |_| XUnit::ElectronVolt } |
+        tag!(&[15]) => { |_| XUnit::Custom } |
+        tag!(&[16]) => { |_| XUnit::DiodeNumber } |
+        tag!(&[17]) => { |_| XUnit::Channel } |
+        tag!(&[18]) => { |_| XUnit::Degrees } |
+        tag!(&[19]) => { |_| XUnit::TemperatureF } |
+        tag!(&[20]) => { |_| XUnit::TemperatureC } |
+        tag!(&[21]) => { |_| XUnit::TemperatureK } |
+        tag!(&[22]) => { |_| XUnit::DataPoints } |
+        tag!(&[23]) => { |_| XUnit::MilliSeconds } |
+        tag!(&[24]) => { |_| XUnit::MicroSeconds } |
+        tag!(&[25]) => { |_| XUnit::NanoSeconds } |
+        tag!(&[26]) => { |_| XUnit::GigaHertz } |
+        tag!(&[27]) => { |_| XUnit::Centimeters } |
+        tag!(&[28]) => { |_| XUnit::Meters } |
+        tag!(&[29]) => { |_| XUnit::MilliMeters } |
+        tag!(&[30]) => { |_| XUnit::Hours } |
+        tag!(&[255]) => { |_| XUnit::NoLabels }
+        )
+);
+
+named!(
+    y_unit<YUnit>,
+    alt!(
+        tag!(&[0]) => { |_| YUnit::Arbitrary } |
+        tag!(&[1]) => { |_| YUnit::Interferogram } |
+        tag!(&[2]) => { |_| YUnit::Absorbance } |
+        tag!(&[3]) => { |_| YUnit::KubelkaMonk } |
+        tag!(&[4]) => { |_| YUnit::Counts } |
+        tag!(&[5]) => { |_| YUnit::Volts } |
+        tag!(&[6]) => { |_| YUnit::Degrees } |
+        tag!(&[7]) => { |_| YUnit::MilliAmpere } |
+        tag!(&[8]) => { |_| YUnit::MilliMeters } |
+        tag!(&[9]) => { |_| YUnit::MilliVolts } |
+        tag!(&[10]) => { |_| YUnit::LogOneOverR } |
+        tag!(&[11]) => { |_| YUnit::Percent } |
+        tag!(&[12]) => { |_| YUnit::Intensity } |
+        tag!(&[13]) => { |_| YUnit::RelativeIntensity } |
+        tag!(&[14]) => { |_| YUnit::Energy } |
+        tag!(&[16]) => { |_| YUnit::Decibel } |
+        tag!(&[19]) => { |_| YUnit::TemperatureF } |
+        tag!(&[20]) => { |_| YUnit::TemperatureC } |
+        tag!(&[21]) => { |_| YUnit::TemperatureK } |
+        tag!(&[22]) => { |_| YUnit::IndexOfRefraction } |
+        tag!(&[23]) => { |_| YUnit::ExtinctionCoefficient } |
+        tag!(&[24]) => { |_| YUnit::Real } |
+        tag!(&[25]) => { |_| YUnit::Imaginary } |
+        tag!(&[26]) => { |_| YUnit::Complex } |
+        tag!(&[128]) => { |_| YUnit::Transmission } |
+        tag!(&[129]) => { |_| YUnit::Reflectance } |
+        tag!(&[130]) => { |_| YUnit::Valley } |
+        tag!(&[131]) => { |_| YUnit::Emission }
+        )
+);
 
 named!(
     pub parse_file<Spc>,
