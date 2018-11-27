@@ -128,22 +128,6 @@ pub fn read_file(filename: &OsString) -> Vec<u8> {
 }
 
 named!(
-    file_version<FileVersion>,
-    alt!(
-        tag!(&[0x4b]) => { |_| FileVersion::NewFormat } |
-        tag!(&[0x4d]) => { |_| FileVersion::OldLabCalcFormat }
-        )
-);
-
-named!(
-    regular_floats<bool>,
-    alt!(
-        tag!(&[0x80]) => { |_| true } |
-        take!(1) => { |_| false }
-        )
-);
-
-named!(
     bit_to_bool((&[u8], usize)) -> bool,
         alt!(
             tag_bits!(u8, 1, 1) => { |_| true } |
@@ -175,6 +159,22 @@ named!(
             })
         )
     )
+);
+
+named!(
+    file_version<FileVersion>,
+    alt!(
+        tag!(&[0x4b]) => { |_| FileVersion::NewFormat } |
+        tag!(&[0x4d]) => { |_| FileVersion::OldLabCalcFormat }
+        )
+);
+
+named!(
+    regular_floats<bool>,
+    alt!(
+        tag!(&[0x80]) => { |_| true } |
+        take!(1) => { |_| false }
+        )
 );
 
 named!(
@@ -252,6 +252,7 @@ named!(
 named!(
     pub parse_file<Spc>,
     do_parse!(
+        // Main header
         file_type_flags: file_type_flags >>
         file_version: file_version >>
         take!(1) >>
@@ -264,12 +265,15 @@ named!(
         y_unit: y_unit_p >>
         z_unit: y_unit_p >>
         take!(217 - 28 - 3 + 30 + 265) >>
+        // End main header
         xy_single_file_x_data: cond!(
             file_type_flags.xy_file &&
             !file_type_flags.multifile &&
             regular_floats,
             count!(le_f32, number_of_points as usize)) >>
+        // First subfile header
         take!(32) >>
+        // First subfile Y values
         single_and_xyy_multi_y_data: cond!(
             !file_type_flags.each_subfile_own_x_array &&
               regular_floats,
