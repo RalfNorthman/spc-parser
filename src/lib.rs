@@ -48,7 +48,11 @@ impl Spc {
                     self.number_of_points,
                     )
             };
-            Ok(SpcVectors{xs, ys})
+            Ok(SpcVectors{
+                xs, 
+                x_unit: self.x_unit,
+                ys, 
+            })
         } else {
             Err("Vectorization failed. Format not supported.")
         }
@@ -58,6 +62,7 @@ impl Spc {
 #[derive(Debug, PartialEq)]
 pub struct SpcVectors {
     pub xs: Vec<f32>,
+    x_unit: XUnit,
     pub ys: Vec<f32>,
 }
 
@@ -77,6 +82,7 @@ impl SpcVectors {
             .zip(&self.ys)
             .map(|(x, y)| (*x, *y))
             .collect();
+
         Chart::new(
             150,
             100,
@@ -85,6 +91,19 @@ impl SpcVectors {
             )
         .lineplot(Shape::Lines(&points))
         .display()
+    }
+
+    pub fn wavenumber_to_nm(self) -> SpcVectors {
+        if self.x_unit == XUnit::WaveNumber {
+            let transform = |x| 10_000_000. / x;
+            SpcVectors {
+                xs: self.xs.iter().map(transform).collect(),
+                x_unit: XUnit::NanoMeters,
+                ys: self.ys,
+            }
+        } else {
+            self
+        }
     }
 }
 

@@ -12,7 +12,7 @@ fn print_file(filename: &OsString) {
 
     match spc_parser::parse_file(&mut raw_file) {
         Ok((_, result)) => match result.to_vectors() {
-            Ok(result) => result.plot(),
+            Ok(result) => result.wavenumber_to_nm().plot(),
             Err(error) => println!("{}", error),
         },
         Err(_) => println!("Parse error."),
