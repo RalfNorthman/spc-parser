@@ -27,7 +27,7 @@ pub struct Spc {
 impl Spc {
     fn is_simple(&self) -> bool {
         match self {
-            Spc{
+            Spc {
                 regular_floats: true,
                 number_of_subfiles: 1,
                 single_and_xyy_multi_y_data: Some(_),
@@ -53,42 +53,39 @@ impl Spc {
             Err("Vectorization failed. Format not supported.")
         }
     }
-
-    pub fn plot(&self) {
-        if !self.regular_floats {
-            println!("No plot - only support for IEEE floats.");
-        } else {
-            if let Some(ys) = &self.single_and_xyy_multi_y_data {
-                let points: Vec<(f32, f32)> =
-                    if let Some(xs) = &self.xy_single_file_x_data {
-                        xs.iter().zip(ys).map(|(x,y)| (*x, *y)).collect()
-                    } else {
-                        let xs = create_points(
-                            self.first_x,
-                            self.last_x,
-                            self.number_of_points,
-                            );
-                        xs.iter().zip(ys).map(|(x,y)| (*x, *y)).collect()
-                    };
-                Chart::new(
-                        150,
-                        100,
-                        self.first_x as f32,
-                        self.last_x as f32,
-                        )
-                    .lineplot(Shape::Lines(&points))
-                    .display()
-            } else {
-                println!("No plot - something went wrong.");
-            }
-        }
-    }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct SpcVectors {
     pub xs: Vec<f32>,
     pub ys: Vec<f32>,
+}
+
+impl SpcVectors {
+    pub fn plot(&self) {
+        let first_x =
+            self.xs
+            .first()
+            .expect("Plot error: empty x vector");
+        let last_x =
+            self.xs
+            .last()
+            .expect("Plot error: empty x vector");
+        let points: Vec<(f32, f32)> =
+            self.xs
+            .iter()
+            .zip(&self.ys)
+            .map(|(x, y)| (*x, *y))
+            .collect();
+        Chart::new(
+            150,
+            100,
+            first_x.min(*last_x),
+            first_x.max(*last_x),
+            )
+        .lineplot(Shape::Lines(&points))
+        .display()
+    }
 }
 
 #[derive(Debug, PartialEq)]
