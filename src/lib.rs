@@ -323,8 +323,8 @@ pub fn plot(spc: Spc) {
                     xs.iter().map(|x| *x).zip(ys).collect()
                 };
             Chart::new(
-                    120,
-                    90,
+                    150,
+                    100,
                     spc.first_x as f32,
                     spc.last_x as f32,
                     )
