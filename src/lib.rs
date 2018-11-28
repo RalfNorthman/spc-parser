@@ -25,6 +25,35 @@ pub struct Spc {
 }
 
 impl Spc {
+    fn is_simple(&self) -> bool {
+        match self {
+            Spc{
+                regular_floats: true,
+                number_of_subfiles: 1,
+                single_and_xyy_multi_y_data: Some(_),
+                ..} => true,
+            _ => false,
+        }
+    }
+
+    pub fn to_vectors<'a>(self) -> Result<SpcVectors, &'a str> {
+        if self.is_simple() {
+            let ys = self.single_and_xyy_multi_y_data.unwrap();
+            let xs = if let Some(xs) = self.xy_single_file_x_data {
+                xs
+            } else {
+                create_points(
+                    self.first_x,
+                    self.last_x,
+                    self.number_of_points,
+                    )
+            };
+            Ok(SpcVectors{xs, ys})
+        } else {
+            Err("Vectorization failed. Format not supported.")
+        }
+    }
+
     pub fn plot(&self) {
         if !self.regular_floats {
             println!("No plot - only support for IEEE floats.");
@@ -54,6 +83,12 @@ impl Spc {
             }
         }
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct SpcVectors {
+    pub xs: Vec<f32>,
+    pub ys: Vec<f32>,
 }
 
 #[derive(Debug, PartialEq)]
