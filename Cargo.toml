@@ -5,3 +5,4 @@ authors = ["Ralf Northman <ralf.northman@spectrogon.com>"]
 
 [dependencies]
 nom = "4.1.1"
+textplots = "0.3.0"

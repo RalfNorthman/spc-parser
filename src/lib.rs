@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate nom;
+extern crate textplots;
 
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
 use nom::{le_u32, le_f64, le_f32};
+use textplots::{Chart, Plot, Shape};
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -295,6 +297,45 @@ named!(
     )
 );
 
+fn create_points(start: f64, stop: f64, n: u32) -> Vec<f32> {
+    let x1 = start as f32;
+    let xn = stop as f32;
+    (0..n)
+    .into_iter()
+    .map(|x| x1 + x as f32 * (xn - x1) / ((n as f32) - 1.))
+    .collect()
+}
+
+pub fn plot(spc: Spc) {
+    if !spc.regular_floats {
+        println!("No plot - only support for IEEE floats.");
+    } else {
+        if let Some(ys) = spc.single_and_xyy_multi_y_data {
+            let points: Vec<(f32, f32)> =
+                if let Some(xs) = spc.xy_single_file_x_data {
+                    xs.iter().map(|x| *x).zip(ys).collect()
+                } else {
+                    let xs = create_points(
+                        spc.first_x,
+                        spc.last_x,
+                        spc.number_of_points,
+                        );
+                    xs.iter().map(|x| *x).zip(ys).collect()
+                };
+            Chart::new(
+                    120,
+                    90,
+                    spc.first_x as f32,
+                    spc.last_x as f32,
+                    )
+                .lineplot(Shape::Lines(&points))
+                .display()
+        } else {
+            println!("No plot - something went wrong.");
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -356,6 +397,22 @@ mod tests {
         assert_eq!(
             y_unit_p(&[128]),
             Ok((&[][..], YUnit::Transmission))
+        );
+    }
+
+    #[test]
+    fn create_points_test() {
+        assert_eq!(
+            create_points(4., 5., 3),
+            vec![4., 4.5, 5.]
+        );
+        assert_eq!(
+            create_points(11., 14., 4),
+            vec![11., 12., 13., 14.]
+        );
+        assert_eq!(
+            create_points(-2., -1., 5),
+            vec![-2., -1.75, -1.5, -1.25, -1.]
         );
     }
 }

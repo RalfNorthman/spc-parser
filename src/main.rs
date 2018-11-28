@@ -11,8 +11,8 @@ fn print_file(filename: &OsString) {
     let mut raw_file = spc_parser::read_file(filename);
 
     match spc_parser::parse_file(&mut raw_file) {
-        Ok((_, result)) => println!("{:#?}", result),
-        Err(error) => println!("{:#?}", error),
+        Ok((_, result)) => spc_parser::plot(result),
+        Err(_) => println!("Parse error."),
     }
 }
 
@@ -28,6 +28,7 @@ fn print_all() {
                     .ends_with(".spc")
                 {
                     println!("{:?}", entry.file_name());
+                    println!("");
                     print_file(&entry.file_name());
                     println!("");
                 }
