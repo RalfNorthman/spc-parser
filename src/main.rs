@@ -11,7 +11,7 @@ fn print_file(filename: &OsString) {
     let mut raw_file = spc_parser::read_file(filename);
 
     match spc_parser::parse_file(&mut raw_file) {
-        Ok((_, result)) => spc_parser::plot(result),
+        Ok((_, result)) => result.plot(),
         Err(_) => println!("Parse error."),
     }
 }

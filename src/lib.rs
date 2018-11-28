@@ -24,6 +24,38 @@ pub struct Spc {
     pub single_and_xyy_multi_y_data: Option<Vec<f32> >,
 }
 
+impl Spc {
+    pub fn plot(&self) {
+        if !self.regular_floats {
+            println!("No plot - only support for IEEE floats.");
+        } else {
+            if let Some(ys) = &self.single_and_xyy_multi_y_data {
+                let points: Vec<(f32, f32)> =
+                    if let Some(xs) = &self.xy_single_file_x_data {
+                        xs.iter().zip(ys).map(|(x,y)| (*x, *y)).collect()
+                    } else {
+                        let xs = create_points(
+                            self.first_x,
+                            self.last_x,
+                            self.number_of_points,
+                            );
+                        xs.iter().zip(ys).map(|(x,y)| (*x, *y)).collect()
+                    };
+                Chart::new(
+                        150,
+                        100,
+                        self.first_x as f32,
+                        self.last_x as f32,
+                        )
+                    .lineplot(Shape::Lines(&points))
+                    .display()
+            } else {
+                println!("No plot - something went wrong.");
+            }
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct FileTypeFlags {
     pub y16bit_precision: bool,
@@ -300,40 +332,12 @@ named!(
 fn create_points(start: f64, stop: f64, n: u32) -> Vec<f32> {
     let x1 = start as f32;
     let xn = stop as f32;
+    let transform = |x| x1 + x as f32 * (xn - x1) / ((n as f32) - 1.);
+
     (0..n)
     .into_iter()
-    .map(|x| x1 + x as f32 * (xn - x1) / ((n as f32) - 1.))
+    .map(transform)
     .collect()
-}
-
-pub fn plot(spc: Spc) {
-    if !spc.regular_floats {
-        println!("No plot - only support for IEEE floats.");
-    } else {
-        if let Some(ys) = spc.single_and_xyy_multi_y_data {
-            let points: Vec<(f32, f32)> =
-                if let Some(xs) = spc.xy_single_file_x_data {
-                    xs.iter().map(|x| *x).zip(ys).collect()
-                } else {
-                    let xs = create_points(
-                        spc.first_x,
-                        spc.last_x,
-                        spc.number_of_points,
-                        );
-                    xs.iter().map(|x| *x).zip(ys).collect()
-                };
-            Chart::new(
-                    150,
-                    100,
-                    spc.first_x as f32,
-                    spc.last_x as f32,
-                    )
-                .lineplot(Shape::Lines(&points))
-                .display()
-        } else {
-            println!("No plot - something went wrong.");
-        }
-    }
 }
 
 #[cfg(test)]
