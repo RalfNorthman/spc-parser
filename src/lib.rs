@@ -203,7 +203,7 @@ pub fn read_file(filename: &OsString) -> Vec<u8> {
         .len();
 
     let mut buffer: Vec<u8> =
-        Vec::with_capacity(file_size as usize);
+        Vec::with_capacity(file_size as usize + 1);
 
     file_handle
         .read_to_end(&mut buffer)
