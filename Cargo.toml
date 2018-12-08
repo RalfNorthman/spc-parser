@@ -2,6 +2,7 @@
 name = "spc_parser"
 version = "0.1.0"
 authors = ["Ralf Northman <ralf.northman@spectrogon.com>"]
+edition = "2018"
 
 [dependencies]
 nom = "4.1.1"
