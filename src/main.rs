@@ -4,19 +4,20 @@ fn main() {
     print_all();
 }
 
+use spc_parser::BoxResult;
 use std::ffi::OsString;
 use std::fs;
 
-fn print_file(filename: &OsString) {
-    let mut raw_file = spc_parser::read_file(filename);
+fn print_file(filename: &OsString) -> BoxResult<()> {
+    let mut raw_file = spc_parser::read_file(filename)?;
 
     match spc_parser::parse_file(&mut raw_file) {
-        Ok((_, result)) => match result.to_vectors() {
-            Ok(result) => result.wavenumber_to_nm().plot(),
-            Err(error) => println!("{}", error),
-        },
+        Ok((_, result)) => {
+            result.to_vectors()?.wavenumber_to_nm().plot()
+        }
         Err(_) => println!("Parse error."),
     }
+    Ok(())
 }
 
 fn print_all() {
@@ -32,7 +33,10 @@ fn print_all() {
                 {
                     println!("{:?}", entry.file_name());
                     println!("");
-                    print_file(&entry.file_name());
+                    match print_file(&entry.file_name()) {
+                        Ok(result) => result,
+                        Err(e) => println!("{}", e),
+                    }
                     println!("");
                 }
             }

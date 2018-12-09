@@ -1,12 +1,17 @@
 #[macro_use]
 extern crate nom;
 extern crate textplots;
+extern crate simple_error;
 
+use simple_error::{SimpleError, SimpleResult};
+use std::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::ffi::OsString;
 use nom::{le_u32, le_f64, le_f32};
 use textplots::{Chart, Plot, Shape};
+
+pub type BoxResult<T> = Result<T, Box<Error> >;
 
 #[derive(Debug, PartialEq)]
 pub struct Spc {
@@ -36,7 +41,7 @@ impl Spc {
         }
     }
 
-    pub fn to_vectors<'a>(self) -> Result<SpcVectors, &'a str> {
+    pub fn to_vectors<'a>(self) -> SimpleResult<SpcVectors> {
         if self.is_simple() {
             let ys = self.single_and_xyy_multi_y_data.unwrap();
             let xs = if let Some(xs) = self.xy_single_file_x_data {
@@ -54,7 +59,8 @@ impl Spc {
                 ys, 
             })
         } else {
-            Err("Vectorization failed. Format not supported.")
+            Err(SimpleError::new(
+                    "Vectorization failed. Format not supported."))
         }
     }
 }
@@ -193,23 +199,21 @@ pub enum YUnit {
     Emission,
 }
 
-pub fn read_file(filename: &OsString) -> Vec<u8> {
+pub fn read_file(filename: &OsString) -> BoxResult<Vec<u8> > {
     let mut file_handle =
-        File::open(filename).expect("Error opening file");
+        File::open(filename)?;
 
     let file_size = file_handle
-        .metadata()
-        .expect("Error getting metadata")
+        .metadata()?
         .len();
 
     let mut buffer: Vec<u8> =
         Vec::with_capacity(file_size as usize + 1);
 
     file_handle
-        .read_to_end(&mut buffer)
-        .expect("Error reading file");
+        .read_to_end(&mut buffer)?;
 
-    buffer
+    Ok(buffer)
 }
 
 named!(
