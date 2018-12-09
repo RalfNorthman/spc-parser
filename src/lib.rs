@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate nom;
-extern crate textplots;
-extern crate simple_error;
 
 use simple_error::{SimpleError, SimpleResult};
 use std::error::Error;

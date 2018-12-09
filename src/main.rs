@@ -1,5 +1,3 @@
-extern crate spc_parser;
-
 fn main() {
     print_all();
 }
